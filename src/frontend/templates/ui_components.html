@@ -1,0 +1,58 @@
+<!-- CUSTOM APP HEADER COMPONENT -->
+<!-- Template keys: {header_text}, {subheader_text} -->
+<div style="text-align: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 20px;">
+    <h1 class="gradient-text" style="margin: 0; font-size: 2.8rem; font-weight: 800; line-height: 1.2;">
+        {header_text}
+    </h1>
+    <p class="sub-text" style="margin: 10px 0 0 0; color: #9CA3AF; font-size: 1.15rem; font-weight: 300;">
+        {subheader_text}
+    </p>
+</div>
+
+<!-- PREDICTION DETAILS DISPLAY CARD -->
+<!-- Template keys: {title}, {price}, {min_price}, {max_price}, {confidence} -->
+<div class="price-box" style="margin: 20px 0;">
+    <div class="price-title" style="font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: #10B981;">
+        {title}
+    </div>
+    <div class="price-value" style="font-size: 3.2rem; font-weight: 800; color: #10B981; margin: 15px 0;">
+        {price}
+    </div>
+    <div class="range-box" style="display: flex; justify-content: center; gap: 30px; margin-top: 15px; font-size: 1.05rem; color: #9CA3AF;">
+        <div>Est. Min: <span class="range-val" style="font-weight: 600; color: #FFFFFF;">{min_price}</span></div>
+        <div style="color: #4B5563;">|</div>
+        <div>Est. Max: <span class="range-val" style="font-weight: 600; color: #FFFFFF;">{max_price}</span></div>
+    </div>
+    <div style="margin-top: 20px; font-size: 0.9rem; color: #34D399; font-weight: 500;">
+        📊 Estimation Range Confidence: {confidence}% (MAPE Error margin based)
+    </div>
+</div>
+
+<!-- METRICS DISPLAY CONTAINER -->
+<!-- Template keys: {m1_title}, {m1_value}, {m2_title}, {m2_value}, {m3_title}, {m3_value} -->
+<div class="metrics-container" style="display: flex; justify-content: space-between; gap: 15px; margin: 20px 0; flex-wrap: wrap;">
+    <div class="metric-card" style="flex: 1; min-width: 180px; text-align: center; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.08); background: rgba(255, 255, 255, 0.02);">
+        <div class="metric-title" style="font-size: 0.8rem; font-weight: 500; text-transform: uppercase; color: #9CA3AF; letter-spacing: 1px; margin-bottom: 8px;">
+            {m1_title}
+        </div>
+        <div class="metric-value" style="font-size: 1.7rem; font-weight: 700; background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            {m1_value}
+        </div>
+    </div>
+    <div class="metric-card" style="flex: 1; min-width: 180px; text-align: center; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.08); background: rgba(255, 255, 255, 0.02);">
+        <div class="metric-title" style="font-size: 0.8rem; font-weight: 500; text-transform: uppercase; color: #9CA3AF; letter-spacing: 1px; margin-bottom: 8px;">
+            {m2_title}
+        </div>
+        <div class="metric-value" style="font-size: 1.7rem; font-weight: 700; background: linear-gradient(135deg, #34D399 0%, #10B981 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            {m2_value}
+        </div>
+    </div>
+    <div class="metric-card" style="flex: 1; min-width: 180px; text-align: center; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.08); background: rgba(255, 255, 255, 0.02);">
+        <div class="metric-title" style="font-size: 0.8rem; font-weight: 500; text-transform: uppercase; color: #9CA3AF; letter-spacing: 1px; margin-bottom: 8px;">
+            {m3_title}
+        </div>
+        <div class="metric-value" style="font-size: 1.7rem; font-weight: 700; background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            {m3_value}
+        </div>
+    </div>
+</div>

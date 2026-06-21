@@ -1,0 +1,143 @@
+/* Import clean modern font */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+
+/* Global overrides for premium typography */
+* {
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* Gradient Header Text */
+.gradient-text {
+    background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    font-size: 2.8rem;
+    letter-spacing: -1px;
+    margin-bottom: 5px;
+}
+
+/* Subheading text */
+.sub-text {
+    color: #8C8C8C;
+    font-size: 1.1rem;
+    margin-bottom: 25px;
+    font-weight: 300;
+}
+
+/* Premium Glassmorphic Card Layouts */
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 15px 0;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Metric Cards Styling */
+.metrics-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.metric-card {
+    flex: 1;
+    min-width: 200px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.metric-card:hover {
+    transform: scale(1.03);
+}
+
+.metric-title {
+    font-size: 0.9rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    color: #A0AEC0;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Custom UI styling for Price Prediction outputs */
+.price-box {
+    text-align: center;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+    border: 2px solid #10B981;
+    border-radius: 20px;
+    padding: 30px;
+    margin: 25px 0;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15);
+}
+
+.price-title {
+    font-size: 1.1rem;
+    color: #D1FAE5;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.price-value {
+    font-size: 3.2rem;
+    font-weight: 800;
+    color: #10B981;
+    text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    margin: 15px 0;
+}
+
+/* Specific styling for range bounds */
+.range-box {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 15px;
+    font-size: 1rem;
+    color: #9CA3AF;
+}
+
+.range-val {
+    font-weight: 600;
+    color: #F9FAFB;
+}
+
+/* Sidebar adjustments */
+.sidebar-logo {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.sidebar-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #FFFFFF;
+    margin-bottom: 20px;
+}
