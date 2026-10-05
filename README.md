@@ -2,7 +2,18 @@
 
 An industry-level, production-ready machine learning system to predict the selling price of used cars in the Indian automobile market.
 
-This project refactors a raw analytical notebook into a professional architecture utilizing modular pipelines, SQLite prediction logging, and a premium glassmorphic Streamlit web application.
+[![GitHub Pages Status](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-10B981?style=for-the-badge&logo=github)](https://frettedmelodist2007-eng.github.io/CarPricePredictorV2/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=frettedmelodist2007-eng/CarPricePredictorV2&branch=main&mainModule=app.py)
+
+---
+
+## 🌐 Public Live Applications
+
+- 🚀 **GitHub Pages Web App (Instant Real-time Inference):**  
+  [https://frettedmelodist2007-eng.github.io/CarPricePredictorV2/](https://frettedmelodist2007-eng.github.io/CarPricePredictorV2/)
+
+- ☁️ **Streamlit Community Cloud Deployment:**  
+  [https://share.streamlit.io/deploy?repository=frettedmelodist2007-eng/CarPricePredictorV2&branch=main&mainModule=app.py](https://share.streamlit.io/deploy?repository=frettedmelodist2007-eng/CarPricePredictorV2&branch=main&mainModule=app.py)
 
 ---
 
@@ -11,9 +22,17 @@ This project refactors a raw analytical notebook into a professional architectur
 ```
 CarPricePredictorV2/
 │
+├── .github/workflows/
+│   └── deploy-pages.yml               # Automated GitHub Pages CI/CD workflow
+│
 ├── architecture/
 │   ├── workflow_diagram.png          # Flowchart illustrating execution flow
 │   └── project_documentation.md       # Full technical details of the pipeline
+│
+├── docs/                             # Standalone GitHub Pages web application
+│   ├── index.html                    # Glassmorphic UI with real-time CatBoost Wasm engine
+│   ├── model_data.json               # Serialized 1,000 CatBoost decision trees & scaler
+│   └── cars_data.json                # Cleaned market dataset for live scatter analytics
 │
 ├── models/
 │   ├── car_price_model_v2.joblib      # CatBoost inference pipeline
@@ -38,6 +57,7 @@ CarPricePredictorV2/
 │
 ├── main.py                            # End-to-end orchestration runner
 ├── app.py                             # Premium Streamlit UI application
+├── export_web_model.py                # Exporter for client-side model weights
 ├── requirements.txt                   # Project package dependencies
 └── run_app.bat                        # Double-click application launcher (Windows)
 ```

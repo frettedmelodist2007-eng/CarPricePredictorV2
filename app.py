@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 import pandas as pd
 import numpy as np
 import streamlit as st
@@ -37,14 +38,10 @@ def load_html_component(component_name):
     if os.path.exists(html_path):
         with open(html_path, 'r', encoding='utf-8') as f:
             html = f.read()
-            # Split the templates by comment banners
-            components = html.split('<!--')
-            for comp in components:
-                if component_name in comp:
-                    # Return the content after the comment block close
-                    parts = comp.split('-->')
-                    if len(parts) > 1:
-                        return parts[1].strip()
+            pattern = rf'<!--\s*{re.escape(component_name)}\s*-->\s*(?:<!--.*?-->\s*)?(.*?)(?=<!--\s*[A-Z0-9 _-]+\s*-->|\Z)'
+            match = re.search(pattern, html, re.DOTALL)
+            if match:
+                return match.group(1).strip()
     return ""
 
 # Initialize database
@@ -165,7 +162,7 @@ with col_input:
         )
         fuel_type = st.selectbox(
             "Fuel Type",
-            ["Petrol", "Diesel", "CNG", "LPG"]
+            ["Petrol", "Diesel", "Hybrid/CNG", "hybrid"]
         )
         
     submit = st.button("💰 Calculate Value", type="primary", use_container_width=True)
@@ -280,6 +277,7 @@ with col_viz:
                         ax.set_ylabel('Ask Price (₹)')
                         ax.legend()
                         st.pyplot(fig)
+                        plt.close(fig)
     else:
         st.markdown('<div class="glass-card" style="text-align: center; padding: 50px 20px;">', unsafe_allow_html=True)
         st.write("### 🚗 Welcome to CarValue Predictor v2")
@@ -288,7 +286,7 @@ with col_viz:
 
 # Historical predictions list
 st.markdown("---")
-st.subheader(" Valuation History Log (SQLite predictions.db)")
+st.subheader("📋 Valuation History Log (SQLite car_predictions.db)")
 history = load_history(limit=8)
 
 if not history.empty:
@@ -298,14 +296,14 @@ if not history.empty:
         'ID', 'Timestamp', 'Brand', 'Model', 'Year', 'KM Driven',
         'Transmission', 'Fuel Type', 'Owner', 'Age (Yrs)', 'Estimated Price (₹)', 'Confidence (%)'
     ]
-    st.dataframe(
-        history_display.style.format({
-            'Estimated Price (₹)': '₹ {:,.2f}',
-            'KM Driven': '{:,.0f} km',
-            'Confidence (%)': '{:.1f}%'
-        }),
-        use_container_width=True,
-        hide_index=True
-    )
+    formatted_df = history_display.style.format({
+        'Estimated Price (₹)': '₹ {:,.2f}',
+        'KM Driven': '{:,.0f} km',
+        'Confidence (%)': '{:.1f}%'
+    })
+    try:
+        st.dataframe(formatted_df, width="stretch", hide_index=True)
+    except TypeError:
+        st.dataframe(formatted_df, use_container_width=True, hide_index=True)
 else:
     st.write("No predictions logged yet. Try evaluating a vehicle to initialize the history log.")

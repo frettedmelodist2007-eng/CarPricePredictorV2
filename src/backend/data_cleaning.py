@@ -1,4 +1,5 @@
 import pandas as pd
+# pyrefly: ignore [missing-import]
 import numpy as np
 import re
 
@@ -49,13 +50,24 @@ def clean_dataset(df):
     # Rename columns if they exist in the rename map
     df_cleaned = df_cleaned.rename(columns={k: v for k, v in rename_map.items() if k in df_cleaned.columns})
     
-    # Ensure correct categories exist
+    # Ensure correct categories and text formatting exist
+    if 'brand' in df_cleaned.columns:
+        df_cleaned['brand'] = df_cleaned['brand'].astype(str).str.strip()
+    if 'model' in df_cleaned.columns:
+        df_cleaned['model'] = df_cleaned['model'].astype(str).str.strip()
     if 'transmission' in df_cleaned.columns:
-        df_cleaned['transmission'] = df_cleaned['transmission'].astype(str)
+        df_cleaned['transmission'] = df_cleaned['transmission'].astype(str).str.strip()
     if 'owner_type' in df_cleaned.columns:
-        df_cleaned['owner_type'] = df_cleaned['owner_type'].astype(str)
+        df_cleaned['owner_type'] = df_cleaned['owner_type'].astype(str).str.lower().str.strip()
     if 'fuel_type' in df_cleaned.columns:
-        df_cleaned['fuel_type'] = df_cleaned['fuel_type'].astype(str)
+        df_cleaned['fuel_type'] = df_cleaned['fuel_type'].astype(str).str.strip()
+        fuel_map = {
+            'CNG': 'Hybrid/CNG',
+            'cng': 'Hybrid/CNG',
+            'Hybrid': 'hybrid',
+            'LPG': 'Hybrid/CNG'
+        }
+        df_cleaned['fuel_type'] = df_cleaned['fuel_type'].replace(fuel_map)
         
     # Clean numeric columns
     if 'km_driven' in df_cleaned.columns:
