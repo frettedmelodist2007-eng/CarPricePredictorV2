@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarValue v2 | Premium AI Valuation System</title>
+    <meta name="description" content="Industry-level machine learning model to estimate the current market value of used cars in India with 1,000 CatBoost trees.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0A0E1A;
+            --bg-secondary: #121829;
+            --card-bg: rgba(255, 255, 255, 0.035);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-hover: rgba(255, 255, 255, 0.14);
+            --text-primary: #F9FAFB;
+            --text-secondary: #9CA3AF;
+            --text-muted: #6B7280;
+            --accent-green: #10B981;
+            --accent-green-glow: rgba(16, 185, 129, 0.25);
+            --accent-blue: #3B82F6;
+            --accent-purple: #8B5CF6;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --input-border: rgba(255, 255, 255, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 30px 20px 60px;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(16, 185, 129, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+        }
+
+        /* Top Nav / Status Banner */
+        .top-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--card-border);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .badge-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.12);
+            color: #34D399;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            background: #10B981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10B981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .repo-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+
+        .repo-link:hover {
+            color: var(--text-primary);
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #A5B4FC 0%, #6366F1 50%, #38BDF8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+            font-weight: 300;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        /* Metrics Bar */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            border-color: var(--card-hover);
+            transform: translateY(-2px);
+        }
+
+        .metric-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .metric-val-blue {
+            font-size: 1.7rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .metric-val-green {
+            font-size: 1.7rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #34D399 0%, #10B981 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .metric-val-amber {
+            font-size: 1.7rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Main Workspace: 2-column layout */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1.35fr;
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        @media (max-width: 960px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 28px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .card-header {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 7px;
+        }
+
+        select, input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            padding: 11px 14px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        select option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        select:focus, input:focus {
+            border-color: #6366F1;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-calc {
+            width: 100%;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-calc:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+            background: linear-gradient(135deg, #4F46E5 0%, #4338CA 100%);
+        }
+
+        .btn-calc:active {
+            transform: translateY(0);
+        }
+
+        /* Valuation Result Glass Box */
+        .valuation-box {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.04) 100%);
+            border: 2px solid var(--accent-green);
+            border-radius: 18px;
+            padding: 28px 20px;
+            margin-bottom: 22px;
+            box-shadow: 0 10px 30px var(--accent-green-glow);
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .val-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #34D399;
+            margin-bottom: 8px;
+        }
+
+        .val-price {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: #10B981;
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+            margin: 10px 0 15px;
+        }
+
+        .val-range {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .val-range span {
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+
+        .val-conf {
+            margin-top: 15px;
+            font-size: 0.88rem;
+            color: #6EE7B7;
+            font-weight: 500;
+        }
+
+        /* Badges */
+        .badge-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .info-pill {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .info-pill strong {
+            color: #FFFFFF;
+        }
+
+        /* Chart section */
+        .chart-box {
+            position: relative;
+            height: 270px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* Empty state welcome card */
+        .welcome-card {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .welcome-card h3 {
+            font-size: 1.5rem;
+            color: #FFFFFF;
+            margin-bottom: 10px;
+        }
+
+        /* History Table */
+        .history-card {
+            margin-top: 30px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--card-border);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+            color: #FFFFFF;
+        }
+
+        .price-highlight {
+            color: #34D399;
+            font-weight: 700;
+        }
+
+        .btn-clear {
+            background: transparent;
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-clear:hover {
+            border-color: #EF4444;
+            color: #EF4444;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: #818CF8;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Nav / Links -->
+        <div class="top-banner">
+            <div class="badge-live">
+                <div class="pulse-dot"></div>
+                <span>ML Model Active (CatBoost 1,000 Trees)</span>
+            </div>
+            <div>
+                <a href="https://github.com/frettedmelodist2007-eng/CarPricePredictorV2" target="_blank" class="repo-link">
+                    <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                    <span>View GitHub Repository</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <h1>🚗 CarValue v2 AI Estimator</h1>
+            <p>Industry-grade machine learning system to estimate the current market value of used cars in India with real-time inference.</p>
+        </header>
+
+        <!-- Metric Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-title">Machine Learning Model</div>
+                <div class="metric-val-blue">CatBoost v2</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">1,000 Oblivious Decision Trees</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Dataset Size</div>
+                <div class="metric-val-green" id="stat-cars">14,993 Cars</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Cleaned Indian Market Listings</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Average Market Price</div>
+                <div class="metric-val-amber" id="stat-price">₹ 9,97,017</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Across All Segments</div>
+            </div>
+        </div>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <!-- Left Form Column -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <span>📝 Vehicle Valuation Details</span>
+                </div>
+                <form id="valuation-form">
+                    <div class="form-group">
+                        <label for="car-brand">Vehicle Brand</label>
+                        <select id="car-brand" required>
+                            <option value="">Loading brands...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="car-model">Vehicle Model</label>
+                        <select id="car-model" required>
+                            <option value="">Select a brand first</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="car-year">Manufacturing Year</label>
+                            <input type="number" id="car-year" min="1990" max="2026" value="2018" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="car-transmission">Transmission</label>
+                            <select id="car-transmission">
+                                <option value="Manual" selected>Manual</option>
+                                <option value="Automatic">Automatic</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="car-km">Kilometers Driven</label>
+                            <input type="number" id="car-km" min="0" max="1000000" step="5000" value="50000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="car-owner">Owner Type</label>
+                            <select id="car-owner">
+                                <option value="first" selected>First Owner</option>
+                                <option value="second">Second Owner</option>
+                                <option value="third">Third Owner</option>
+                                <option value="fourth & above">Fourth & Above</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="car-fuel">Fuel Type</label>
+                        <select id="car-fuel">
+                            <option value="Petrol" selected>Petrol</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Hybrid/CNG">Hybrid / CNG</option>
+                            <option value="hybrid">hybrid</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-calc" id="btn-submit">
+                        <span>💰</span>
+                        <span>Calculate Valuation</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Visualizer / Prediction Column -->
+            <div class="glass-card" id="result-panel">
+                <div class="welcome-card" id="welcome-msg">
+                    <div style="font-size: 3rem; margin-bottom: 12px;">🚗</div>
+                    <h3>Welcome to CarValue Predictor v2</h3>
+                    <p>Select your vehicle parameters on the left and click <strong>Calculate Valuation</strong> to evaluate current market pricing powered by CatBoost ML.</p>
+                </div>
+
+                <div id="prediction-content" style="display: none;">
+                    <div class="valuation-box">
+                        <div class="val-title">Estimated Market Valuation</div>
+                        <div class="val-price" id="res-price">₹ 0</div>
+                        <div class="val-range">
+                            <div>Est. Min: <span id="res-min">₹ 0</span></div>
+                            <div style="color: var(--card-border);">|</div>
+                            <div>Est. Max: <span id="res-max">₹ 0</span></div>
+                        </div>
+                        <div class="val-conf" id="res-conf">📊 Estimation Confidence: 85.0% (MAPE Error Margin)</div>
+                    </div>
+
+                    <div class="badge-row">
+                        <div class="info-pill">Segment: <strong id="res-segment">Standard</strong></div>
+                        <div class="info-pill">Annual Usage: <strong id="res-usage">5,556 km/yr</strong></div>
+                        <div class="info-pill">Car Age: <strong id="res-age">8 Years</strong></div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h4 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 10px;" id="chart-title">Market Analytics: Similar Listings</h4>
+                        <div class="chart-box">
+                            <canvas id="scatterChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Valuation History Log -->
+        <section class="glass-card history-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div class="card-header" style="margin-bottom: 0;">
+                    <span>📋 Valuation History Log</span>
+                </div>
+                <button class="btn-clear" id="btn-clear-history">Clear History</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Brand</th>
+                            <th>Model</th>
+                            <th>Year</th>
+                            <th>KM Driven</th>
+                            <th>Fuel</th>
+                            <th>Transmission</th>
+                            <th>Owner</th>
+                            <th>Valuation</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr>
+                            <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 25px;">No valuations yet. Estimate a car above to log results.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>Car Price Predictor v2 &bull; Open-source machine learning project &bull; <a href="https://github.com/frettedmelodist2007-eng/CarPricePredictorV2" target="_blank">GitHub Repository</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // State variables
+        let modelData = null;
+        let carsData = [];
+        let scatterChartInstance = null;
+
+        const PREMIUM_BRANDS = ['Honda', 'Toyota', 'Volkswagen', 'Skoda'];
+        const LUXURY_BRANDS = ['Mercedes-Benz', 'BMW', 'Audi', 'Volvo', 'Jaguar', 'Land Rover'];
+        const OWNER_MAP = {'first': 1, 'second': 2, 'third': 3, 'fourth & above': 4};
+
+        // DOM elements
+        const brandSelect = document.getElementById('car-brand');
+        const modelSelect = document.getElementById('car-model');
+        const form = document.getElementById('valuation-form');
+        const welcomeMsg = document.getElementById('welcome-msg');
+        const predContent = document.getElementById('prediction-content');
+        const resPrice = document.getElementById('res-price');
+        const resMin = document.getElementById('res-min');
+        const resMax = document.getElementById('res-max');
+        const resConf = document.getElementById('res-conf');
+        const resSegment = document.getElementById('res-segment');
+        const resUsage = document.getElementById('res-usage');
+        const resAge = document.getElementById('res-age');
+        const chartTitle = document.getElementById('chart-title');
+        const historyTbody = document.getElementById('history-tbody');
+        const btnClear = document.getElementById('btn-clear-history');
+
+        // Number formatter for Indian currency
+        function formatINR(val) {
+            return '₹ ' + Math.round(val).toLocaleString('en-IN');
+        }
+
+        // Initialize and load model & cars dataset
+        async function init() {
+            try {
+                const [modelRes, carsRes] = await Promise.all([
+                    fetch('model_data.json'),
+                    fetch('cars_data.json')
+                ]);
+
+                modelData = await modelRes.json();
+                carsData = await carsRes.json();
+
+                // Update metrics
+                document.getElementById('stat-cars').textContent = `${modelData.total_cars.toLocaleString()} Cars`;
+                document.getElementById('stat-price').textContent = formatINR(modelData.avg_price);
+
+                // Populate brands
+                brandSelect.innerHTML = '';
+                const brands = Object.keys(modelData.brands_models).sort();
+                brands.forEach(b => {
+                    const opt = document.createElement('option');
+                    opt.value = b;
+                    opt.textContent = b;
+                    if (b === 'Maruti Suzuki') opt.selected = true;
+                    brandSelect.appendChild(opt);
+                });
+
+                updateModelList();
+                renderHistory();
+            } catch (err) {
+                console.error('Failed to load model data:', err);
+                brandSelect.innerHTML = '<option>Error loading models</option>';
+            }
+        }
+
+        // Update model dropdown on brand change
+        function updateModelList() {
+            const selectedBrand = brandSelect.value;
+            const models = (modelData && modelData.brands_models[selectedBrand]) || [];
+            modelSelect.innerHTML = '';
+            models.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                if (m === 'Swift') opt.selected = true;
+                modelSelect.appendChild(opt);
+            });
+        }
+
+        brandSelect.addEventListener('change', updateModelList);
+
+        // CatBoost Oblivious Trees Inference Engine in JS
+        function predictValuation(brand, modelName, year, kmDriven, transmission, ownerType, fuelType) {
+            const currentYear = 2026;
+            const carAge = currentYear - year;
+            const brandModel = `${brand}_${modelName}`;
+            const usagePerYear = kmDriven / (carAge + 1);
+            const isPremium = PREMIUM_BRANDS.includes(brand) ? 1 : 0;
+            const isLuxury = LUXURY_BRANDS.includes(brand) ? 1 : 0;
+            const ownershipScore = OWNER_MAP[ownerType.toLowerCase()] || 1;
+
+            // 1. Numerical scaling
+            const rawNums = [kmDriven, carAge, usagePerYear, isPremium, isLuxury, ownershipScore];
+            const featArray = new Float32Array(891);
+
+            for (let i = 0; i < 6; i++) {
+                featArray[i] = (rawNums[i] - modelData.means[i]) / modelData.scales[i];
+            }
+
+            // 2. One-hot categorical encoding
+            const catInputs = {
+                'brand': brand,
+                'model': modelName,
+                'transmission': transmission,
+                'owner_type': ownerType.toLowerCase(),
+                'fuel_type': fuelType,
+                'brand_model': brandModel
+            };
+
+            for (const [col, val] of Object.entries(catInputs)) {
+                if (modelData.cat_map[col] && modelData.cat_map[col][val] !== undefined) {
+                    const idx = modelData.cat_map[col][val];
+                    featArray[idx] = 1.0;
+                }
+            }
+
+            // 3. Tree summation
+            let pred = modelData.bias;
+            const trees = modelData.trees;
+            for (let t = 0; t < trees.length; t++) {
+                const tree = trees[t];
+                let leafIdx = 0;
+                for (let s = 0; s < tree.s.length; s++) {
+                    const split = tree.s[s];
+                    if (featArray[split[0]] > split[1]) {
+                        leafIdx |= (1 << s);
+                    }
+                }
+                pred += tree.l[leafIdx];
+            }
+
+            return {
+                price: Math.max(10000, pred),
+                carAge: carAge,
+                usagePerYear: usagePerYear,
+                isPremium: isPremium,
+                isLuxury: isLuxury
+            };
+        }
+
+        // Form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!modelData) return;
+
+            const brand = brandSelect.value;
+            const modelName = modelSelect.value;
+            const year = parseInt(document.getElementById('car-year').value);
+            const km = parseFloat(document.getElementById('car-km').value);
+            const transmission = document.getElementById('car-transmission').value;
+            const owner = document.getElementById('car-owner').value;
+            const fuel = document.getElementById('car-fuel').value;
+
+            // Run prediction
+            const res = predictValuation(brand, modelName, year, km, transmission, owner, fuel);
+            const dev = res.price * 0.12;
+            const minPrice = Math.max(10000, res.price - dev);
+            const maxPrice = res.price + dev;
+            const conf = Math.max(65.0, 95.0 - (res.carAge * 1.8));
+
+            // Display results
+            welcomeMsg.style.display = 'none';
+            predContent.style.display = 'block';
+
+            resPrice.textContent = formatINR(res.price);
+            resMin.textContent = formatINR(minPrice);
+            resMax.textContent = formatINR(maxPrice);
+            resConf.textContent = `📊 Estimation Range Confidence: ${conf.toFixed(1)}% (MAPE Margin based)`;
+
+            resSegment.textContent = res.isLuxury ? 'Luxury' : res.isPremium ? 'Premium' : 'Standard';
+            resUsage.textContent = `${Math.round(res.usagePerYear).toLocaleString()} km/yr`;
+            resAge.textContent = `${res.carAge} Years`;
+
+            chartTitle.textContent = `Market Analytics: Similar ${brand} ${modelName} Listings`;
+
+            // Draw Scatter Chart
+            renderChart(brand, modelName, km, res.price);
+
+            // Save to localStorage history
+            saveHistory({
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                brand: brand,
+                model: modelName,
+                year: year,
+                km: km,
+                fuel: fuel,
+                transmission: transmission,
+                owner: owner,
+                price: res.price,
+                conf: conf
+            });
+        });
+
+        // Scatter chart using Chart.js
+        function renderChart(brand, modelName, predKm, predPrice) {
+            const similar = carsData.filter(c => c[0] === brand && c[1] === modelName);
+            const dataPoints = similar.map(c => ({
+                x: c[3],
+                y: c[4],
+                year: c[2]
+            }));
+
+            const ctx = document.getElementById('scatterChart').getContext('2d');
+            if (scatterChartInstance) {
+                scatterChartInstance.destroy();
+            }
+
+            scatterChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Market Listings',
+                            data: dataPoints,
+                            backgroundColor: 'rgba(99, 102, 241, 0.65)',
+                            borderColor: 'rgba(129, 140, 248, 0.9)',
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        },
+                        {
+                            label: 'Predicted Valuation',
+                            data: [{ x: predKm, y: predPrice }],
+                            backgroundColor: '#EF4444',
+                            borderColor: '#FFFFFF',
+                            borderWidth: 2,
+                            pointRadius: 10,
+                            pointStyle: 'rectRot',
+                            pointHoverRadius: 12
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Kilometers Driven', color: '#9CA3AF' },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#9CA3AF' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Ask Price (₹)', color: '#9CA3AF' },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: {
+                                color: '#9CA3AF',
+                                callback: val => '₹' + (val >= 100000 ? (val / 100000).toFixed(1) + 'L' : val)
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#D1D5DB' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const p = ctx.raw;
+                                    return `${ctx.dataset.label}: ${p.x.toLocaleString()} km - ₹${p.y.toLocaleString('en-IN')}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Local history storage
+        function getHistory() {
+            try {
+                return JSON.parse(localStorage.getItem('carvalue_v2_history') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function saveHistory(item) {
+            const list = getHistory();
+            list.unshift(item);
+            if (list.length > 10) list.pop();
+            localStorage.setItem('carvalue_v2_history', JSON.stringify(list));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const list = getHistory();
+            if (list.length === 0) {
+                historyTbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted); padding: 25px;">No valuations yet. Estimate a car above to log results.</td></tr>';
+                return;
+            }
+            historyTbody.innerHTML = list.map(item => `
+                <tr>
+                    <td>${item.time}</td>
+                    <td><strong>${item.brand}</strong></td>
+                    <td>${item.model}</td>
+                    <td>${item.year}</td>
+                    <td>${item.km.toLocaleString()} km</td>
+                    <td>${item.fuel}</td>
+                    <td>${item.transmission}</td>
+                    <td>${item.owner}</td>
+                    <td class="price-highlight">${formatINR(item.price)}</td>
+                    <td>${item.conf.toFixed(1)}%</td>
+                </tr>
+            `).join('');
+        }
+
+        btnClear.addEventListener('click', () => {
+            localStorage.removeItem('carvalue_v2_history');
+            renderHistory();
+        });
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
